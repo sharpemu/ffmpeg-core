@@ -119,6 +119,7 @@ jobs:
           (cd ${{ matrix.vcpkg-root }} && git fetch origin)
           (cd ${{ matrix.vcpkg-root }} && git reset --hard)
           (cd ${{ matrix.vcpkg-root }} && git checkout 34823ada10080ddca99b60e85f80f55e18a44eea)
+          cmake -E copy "${{ github.workspace }}/bink2.patch" "${{ matrix.vcpkg-root }}/ports/ffmpeg/bink2.patch"
           (cd ${{ matrix.vcpkg-root }} && git apply --ignore-space-change --ignore-whitespace --3way ${{ github.workspace }}/ffmpeg.patch)
 
       - name: Build ffmpeg
@@ -142,7 +143,7 @@ jobs:
   create-release:
     needs: [build]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.repository_owner == 'Vita3K'
+    if: github.ref == 'refs/heads/master' && github.repository_owner == 'sharpemu'
     permissions:
       contents: write
     concurrency:

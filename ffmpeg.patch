@@ -1,5 +1,5 @@
 diff --git a/ports/ffmpeg/build.sh.in b/ports/ffmpeg/build.sh.in
-index fd794d41c8..b801972ee7 100644
+index dfb5698..4fd8cc1 100644
 --- a/ports/ffmpeg/build.sh.in
 +++ b/ports/ffmpeg/build.sh.in
 @@ -75,7 +75,7 @@ OSX_ARCH_COUNT=0@OSX_ARCH_COUNT@
@@ -12,24 +12,32 @@ index fd794d41c8..b801972ee7 100644
      OPTIONS_x86_64="${OPTIONS_x86}"
  else
 diff --git a/ports/ffmpeg/portfile.cmake b/ports/ffmpeg/portfile.cmake
-index 03397d7af2..d36c16fcbe 100644
+index e15541e..0f73bf8 100644
 --- a/ports/ffmpeg/portfile.cmake
 +++ b/ports/ffmpeg/portfile.cmake
-@@ -30,7 +30,22 @@ if (VCPKG_TARGET_ARCHITECTURE STREQUAL "x86" OR VCPKG_TARGET_ARCHITECTURE STREQU
+@@ -18,6 +18,7 @@ vcpkg_from_github(
+         0041-add-const-for-opengl-definition.patch
+         0043-fix-miss-head.patch
+         0044-fix-vulkan-debug-callback-abi.patch
++        bink2.patch
+ )
+ 
+ if(SOURCE_PATH MATCHES " ")
+@@ -30,7 +31,22 @@ if (VCPKG_TARGET_ARCHITECTURE STREQUAL "x86" OR VCPKG_TARGET_ARCHITECTURE STREQU
      vcpkg_add_to_path("${NASM_EXE_PATH}")
  endif()
  
 -set(OPTIONS "--enable-pic --disable-doc --enable-debug --enable-runtime-cpudetect --disable-autodetect")
 +set(OPTIONS "--enable-pic --disable-doc --enable-runtime-cpudetect --disable-autodetect")
 +
-+# Only enable what is used by Vita3K
++# Only enable what is used by SharpEmu
 +string(APPEND OPTIONS " --disable-everything")
-+string(APPEND OPTIONS " --enable-decoder=aac --enable-decoder=aac_latm --enable-decoder=atrac3 --enable-decoder=atrac3p --enable-decoder=atrac9 --enable-decoder=mp3 --enable-decoder=pcm_s16le --enable-decoder=pcm_s8")
++string(APPEND OPTIONS " --enable-decoder=aac --enable-decoder=aac_latm --enable-decoder=atrac3 --enable-decoder=atrac3p --enable-decoder=atrac9 --enable-decoder=bink --enable-decoder=bink2 --enable-decoder=binkaudio_dct --enable-decoder=binkaudio_rdft --enable-decoder=mp3 --enable-decoder=pcm_s16le --enable-decoder=pcm_s8")
 +string(APPEND OPTIONS " --enable-decoder=mov --enable-decoder=h264 --enable-decoder=mpeg4 --enable-decoder=mpeg2video --enable-decoder=mjpeg --enable-decoder=mjpegb")
 +string(APPEND OPTIONS " --enable-encoder=pcm_s16le")
 +string(APPEND OPTIONS " --enable-encoder=ffv1 --enable-encoder=mpeg4 --enable-encoder=mjpeg")
 +string(APPEND OPTIONS " --enable-muxer=avi")
-+string(APPEND OPTIONS " --enable-demuxer=h264 --enable-demuxer=m4v --enable-demuxer=mp3 --enable-demuxer=mpegvideo --enable-demuxer=mpegps --enable-demuxer=mjpeg --enable-demuxer=mov --enable-demuxer=avi --enable-demuxer=aac --enable-demuxer=pmp --enable-demuxer=oma --enable-demuxer=pcm_s16le --enable-demuxer=pcm_s8 --enable-demuxer=wav")
++string(APPEND OPTIONS " --enable-demuxer=bink --enable-demuxer=h264 --enable-demuxer=m4v --enable-demuxer=mp3 --enable-demuxer=mpegvideo --enable-demuxer=mpegps --enable-demuxer=mjpeg --enable-demuxer=mov --enable-demuxer=avi --enable-demuxer=aac --enable-demuxer=pmp --enable-demuxer=oma --enable-demuxer=pcm_s16le --enable-demuxer=pcm_s8 --enable-demuxer=wav")
 +string(APPEND OPTIONS " --enable-parser=h264 --enable-parser=mpeg4video --enable-parser=mpegaudio --enable-parser=mpegvideo --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm")
 +string(APPEND OPTIONS " --enable-protocol=file")
 +string(APPEND OPTIONS " --enable-bsf=mjpeg2jpeg")
@@ -39,7 +47,7 @@ index 03397d7af2..d36c16fcbe 100644
  
  if(VCPKG_TARGET_IS_MINGW)
      if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
-@@ -62,7 +77,7 @@ endif()
+@@ -62,7 +78,7 @@ endif()
  vcpkg_cmake_get_vars(cmake_vars_file)
  include("${cmake_vars_file}")
  if(VCPKG_DETECTED_MSVC)
@@ -48,7 +56,7 @@ index 03397d7af2..d36c16fcbe 100644
      set(OPTIONS "--toolchain=msvc ${OPTIONS}")
      # This is required because ffmpeg depends upon optimizations to link correctly
      string(APPEND VCPKG_COMBINED_C_FLAGS_DEBUG " -O2")
-@@ -724,6 +739,11 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
+@@ -728,6 +744,11 @@ if (NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
      # We use response files here as the only known way to handle spaces in paths
      set(crsp "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/cflags.rsp")
      string(REGEX REPLACE "-arch [A-Za-z0-9_]+" "" VCPKG_COMBINED_C_FLAGS_RELEASE_SANITIZED "${VCPKG_COMBINED_C_FLAGS_RELEASE}")
@@ -62,7 +70,7 @@ index 03397d7af2..d36c16fcbe 100644
      string(REGEX REPLACE "-arch [A-Za-z0-9_]+" "" VCPKG_COMBINED_SHARED_LINKER_FLAGS_RELEASE_SANITIZED "${VCPKG_COMBINED_SHARED_LINKER_FLAGS_RELEASE}")
 diff --git a/triplets/community/arm64-android-dynamic-release.cmake b/triplets/community/arm64-android-dynamic-release.cmake
 new file mode 100644
-index 0000000000..c585a15f36
+index 0000000..c585a15
 --- /dev/null
 +++ b/triplets/community/arm64-android-dynamic-release.cmake
 @@ -0,0 +1,7 @@
@@ -75,7 +83,7 @@ index 0000000000..c585a15f36
 +set(VCPKG_BUILD_TYPE release)
 diff --git a/triplets/community/arm64-android-static-release.cmake b/triplets/community/arm64-android-static-release.cmake
 new file mode 100644
-index 0000000000..b01b738eed
+index 0000000..b01b738
 --- /dev/null
 +++ b/triplets/community/arm64-android-static-release.cmake
 @@ -0,0 +1,7 @@

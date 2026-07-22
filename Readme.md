@@ -1,5 +1,8 @@
-## FFmpeg builtins
+## SharpEmu FFmpeg core
 
-This repository contains the ffmpeg builtins for Vita3K and the CI to build them using vcpkg and github action.
+This repository builds the static FFmpeg libraries used by SharpEmu. It adds the
+Bink 2 decoder to FFmpeg 7.1.2 and produces CI artifacts for supported platforms
+through vcpkg.
 
-The Windows version is built using clang-cl, this is done so that inline assembly optimisations (which are not supported by MSVC) can be enabled.
+The Windows version uses clang-cl so FFmpeg inline assembly optimizations remain
+enabled.
