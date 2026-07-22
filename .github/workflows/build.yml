@@ -31,7 +31,7 @@ jobs:
 
           - build: windows
             os: windows-latest
-            triplet: win-llvm-static-release
+            triplet: win-llvm-dynamic-release
             vcpkg-root: C:\vcpkg
             extra-args: --overlay-triplets=./triplets
 
@@ -55,7 +55,7 @@ jobs:
             os: macos-latest
             triplet: osx-release
             vcpkg-root: /Users/runner/vcpkg
-            extra-args: ""
+            extra-args: --overlay-triplets=./triplets
 
           - build: macos
             os: macos-latest
@@ -140,7 +140,13 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: ffmpeg-${{ matrix.build }}-${{ matrix.arch }}
-          path: ${{ matrix.vcpkg-root }}/packages/ffmpeg_${{ matrix.arch }}-${{ matrix.triplet }}/lib
+          # Dynamic-linkage triplets put the actual runtime library in bin/
+          # on Windows (.dll; lib/ only has the .lib import stub) and in
+          # lib/ on Linux/macOS (.so/.dylib); include both so whichever
+          # applies is captured.
+          path: |
+            ${{ matrix.vcpkg-root }}/packages/ffmpeg_${{ matrix.arch }}-${{ matrix.triplet }}/lib
+            ${{ matrix.vcpkg-root }}/packages/ffmpeg_${{ matrix.arch }}-${{ matrix.triplet }}/bin
         if: ${{ always() }}
 
   create-release:

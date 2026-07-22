@@ -1,13 +1,9 @@
-# Overlay of vcpkg's community x64-linux-release triplet. These static
-# libraries get linked into a shared library (SharpEmu's
-# sharpemu_bink2_bridge.c), which the ELF format requires -fPIC for -- the
-# stock triplet doesn't set it, since it assumes linking into a standalone
-# executable instead.
+# Overlay of vcpkg's community x64-linux-release triplet, switched to
+# dynamic linkage: SharpEmu P/Invokes directly into these .so files at
+# runtime instead of linking them into its own bridge, so a real shared
+# object is what's needed here, not a static archive.
 set(VCPKG_TARGET_ARCHITECTURE x64)
 set(VCPKG_CRT_LINKAGE dynamic)
-set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE dynamic)
 set(VCPKG_CMAKE_SYSTEM_NAME Linux)
 set(VCPKG_BUILD_TYPE release)
-
-set(VCPKG_C_FLAGS "-fPIC")
-set(VCPKG_CXX_FLAGS "-fPIC")
