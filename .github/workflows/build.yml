@@ -27,7 +27,7 @@ jobs:
             os: ubuntu-latest
             triplet: linux-release
             vcpkg-root: /usr/local/share/vcpkg
-            extra-args: ""
+            extra-args: --overlay-triplets=./triplets
 
           - build: windows
             os: windows-latest
