@@ -10,6 +10,8 @@ jobs:
   build:
     name: ${{ matrix.build }} ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    env:
+      VCPKG_ROOT: ${{ matrix.vcpkg-root }}
 
     strategy:
       fail-fast: false
@@ -124,6 +126,22 @@ jobs:
           (cd ${{ matrix.vcpkg-root }} && git checkout 34823ada10080ddca99b60e85f80f55e18a44eea)
           cmake -E copy "${{ github.workspace }}/bink2.patch" "${{ matrix.vcpkg-root }}/ports/ffmpeg/bink2.patch"
           (cd ${{ matrix.vcpkg-root }} && git apply --ignore-space-change --ignore-whitespace --3way ${{ github.workspace }}/ffmpeg.patch)
+
+      # The runner's preinstalled binary may not support the pinned scripts' schema.
+      - name: Bootstrap pinned vcpkg (Windows)
+        if: runner.os == 'Windows'
+        working-directory: ${{ matrix.vcpkg-root }}
+        run: |
+          .\bootstrap-vcpkg.bat -disableMetrics
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "${{ matrix.vcpkg-root }}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Bootstrap pinned vcpkg (Unix)
+        if: runner.os != 'Windows'
+        working-directory: ${{ matrix.vcpkg-root }}
+        run: |
+          ./bootstrap-vcpkg.sh -disableMetrics
+          echo "$PWD" >> "$GITHUB_PATH"
 
       - name: Build ffmpeg
         run: |
