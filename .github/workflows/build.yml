@@ -37,6 +37,11 @@ jobs:
             vcpkg-root: C:\vcpkg
             extra-args: --overlay-triplets=./triplets
 
+          # VS2026 has no ARM64 CRT for the v143 toolset selected by pinned vcpkg.
+          - build: windows
+            arch: arm64
+            os: windows-2022
+
           - build: mingw
             os: windows-latest
             triplet: mingw-static
